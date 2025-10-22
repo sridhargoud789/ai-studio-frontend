@@ -1,10 +1,14 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginRequest, registerRequest } from '../store/slices/authSlice';
+import {
+  loginRequest,
+  registerRequest,
+  clearRegistered,
+} from '../store/slices/authSlice';
 import { RootState, AppDispatch } from '../store';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 
 export default function AuthForm() {
   const dispatch = useDispatch<AppDispatch>();
@@ -28,7 +32,15 @@ export default function AuthForm() {
     if (auth.error) {
       toast.error(String(auth.error));
     }
-  }, [auth.token, auth.error, router]);
+
+    if (auth.registered) {
+      toast.success('Registered successfully! Please login.');
+      setUsername('');
+      setPassword('');
+      setMode('login');
+      dispatch(clearRegistered());
+    }
+  }, [auth.token, auth.error, auth.registered, router]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,53 +57,56 @@ export default function AuthForm() {
   };
 
   return (
-    <form
-      onSubmit={submit}
-      className='bg-gray-900 p-8 rounded-2xl max-w-md mx-auto shadow-lg'
-    >
-      <h2 className='text-2xl font-bold mb-4 text-center'>
-        {mode === 'login' ? 'Login' : 'Register'}
-      </h2>
-
-      <input
-        type='text'
-        placeholder='Username'
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className='w-full p-3 mb-3 bg-gray-800 rounded-lg outline-none'
-      />
-
-      <input
-        type='password'
-        placeholder='Password'
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className='w-full p-3 mb-3 bg-gray-800 rounded-lg outline-none'
-      />
-
-      <button
-        type='submit'
-        className='w-full py-3 bg-indigo-600 rounded-lg font-semibold disabled:opacity-60'
-        disabled={auth.loading}
+    <>
+      <Toaster />
+      <form
+        onSubmit={submit}
+        className='bg-gray-900 p-8 rounded-2xl max-w-md mx-auto shadow-lg'
       >
-        {auth.loading
-          ? mode === 'login'
-            ? 'Logging in...'
-            : 'Registering...'
-          : mode === 'login'
-          ? 'Login'
-          : 'Register'}
-      </button>
+        <h2 className='text-2xl font-bold mb-4 text-center'>
+          {mode === 'login' ? 'Login' : 'Register'}
+        </h2>
 
-      <p className='mt-3 text-sm text-gray-400 text-center'>
-        {mode === 'login' ? 'New here?' : 'Have an account?'}{' '}
-        <span
-          className='text-indigo-400 cursor-pointer'
-          onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+        <input
+          type='text'
+          placeholder='Username'
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className='w-full p-3 mb-3 bg-gray-800 rounded-lg outline-none'
+        />
+
+        <input
+          type='password'
+          placeholder='Password'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className='w-full p-3 mb-3 bg-gray-800 rounded-lg outline-none'
+        />
+
+        <button
+          type='submit'
+          className='w-full py-3 bg-indigo-600 rounded-lg font-semibold disabled:opacity-60'
+          disabled={auth.loading}
         >
-          {mode === 'login' ? 'Register' : 'Login'}
-        </span>
-      </p>
-    </form>
+          {auth.loading
+            ? mode === 'login'
+              ? 'Logging in...'
+              : 'Registering...'
+            : mode === 'login'
+            ? 'Login'
+            : 'Register'}
+        </button>
+
+        <p className='mt-3 text-sm text-gray-400 text-center'>
+          {mode === 'login' ? 'New here?' : 'Have an account?'}{' '}
+          <span
+            className='text-indigo-400 cursor-pointer'
+            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+          >
+            {mode === 'login' ? 'Register' : 'Login'}
+          </span>
+        </p>
+      </form>
+    </>
   );
 }

@@ -5,6 +5,7 @@ import {
   loginFailure,
   registerRequest,
   registerSuccess,
+  registerFailure,
 } from '../slices/authSlice';
 import { api, setAuthToken } from '../../lib/api';
 import { saveToken } from '../../lib/auth';
@@ -24,14 +25,14 @@ function* handleLogin(action: any): Generator<any, void, any> {
   }
 }
 
-function* handleRegister(action: any): Generator<any, void, any> {
+function* handleRegister(action: any) {
   try {
     const { username, password } = action.payload;
     yield call(api.post, '/auth/register', { username, password });
     yield put(registerSuccess());
   } catch (err: any) {
     const message = formatError(err);
-    yield put(loginFailure({ error: message }));
+    yield put(registerFailure({ error: message }));
   }
 }
 
