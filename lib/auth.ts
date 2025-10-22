@@ -1,4 +1,4 @@
-import * as jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 export function getTokenFromStorage(): string | null {
   return typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -15,7 +15,7 @@ export function removeToken() {
 export function isTokenExpired(token: string | null | undefined): boolean {
   if (!token) return true;
   try {
-    const decoded: any = (jwt_decode as any)(token);
+    const decoded: any = jwtDecode(token);
     if (!decoded || !decoded.exp) return false;
     const now = Date.now() / 1000;
     return decoded.exp < now;
